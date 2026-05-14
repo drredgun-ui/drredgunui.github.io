@@ -2,99 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hii</title>
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#000;
+      color:#fff;
+      font-family:Arial,sans-serif;
     }
 
-    h1 {
-      font-size: 4rem;
-      }
+    h1{
+      font-size:4rem;
+    }
   </style>
 </head>
 <body>
-  <h1>Hii 👋</h1>
 
-  <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPg4OzM5loN72T2QzGxQsDu-jBquY1Nn-PTvG5loG9rgWrOb-FXPIeeFKktsya3jmU/exec";
+<h1>Hii 👋</h1>
 
-    function getBrowser() {
-      const ua = navigator.userAgent;
+<script>
 
-      if (ua.includes("Firefox")) return "Firefox";
-      if (ua.includes("Edg")) return "Edge";
-      if (ua.includes("Chrome")) return "Chrome";
-      if (ua.includes("Safari")) return "Safari";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZ8REUQalNOK9dF9OOfLIH9VMWqZEJv6vrA_FLUZy1OXnb04r_kj-WzjwrqYuGBeOE/exec";
 
-      return "Unknown";
-    }
+function getDeviceType() {
+  return /Mobi|Android/i.test(navigator.userAgent)
+    ? "Mobile"
+    : "Desktop";
+}
 
-    function getOS() {
-      const ua = navigator.userAgent;
+function getBrowser() {
 
-      if (ua.includes("Windows")) return "Windows";
-      if (ua.includes("Mac")) return "MacOS";
-      if (ua.includes("Android")) return "Android";
-      if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
-      if (ua.includes("Linux")) return "Linux";
-   return "Unknown";
-    }
+  const ua = navigator.userAgent;
 
-    function getDeviceType() {
-      const ua = navigator.userAgent;
+  if (ua.includes("Firefox")) return "Firefox";
+  if (ua.includes("Edg")) return "Edge";
+  if (ua.includes("Chrome")) return "Chrome";
+  if (ua.includes("Safari")) return "Safari";
 
-      if (/mobile/i.test(ua)) return "Mobile";
-      if (/tablet/i.test(ua)) return "Tablet";
+  return "Unknown";
+}
 
-      return "Desktop";
-    }
+function getOS() {
 
-    async function collectVisitorInfo() {
-      try {
-        // Get IP + location data
-        const response = await fetch("https://ipapi.co/json/");
-        const locationData = await response.json();
+  const ua = navigator.userAgent;
 
-        const payload = {
-          deviceType: getDeviceType(),
-          browser: getBrowser(),
-          os: getOS(),
-          screenSize: `${window.screen.width}x${window.screen.height}`,
-          ip: locationData.ip || "",
-          city: locationData.city || "",
-          region: locationData.region || "",
-          country: locationData.country_name || "",
-          userAgent: navigator.userAgent
-        };
+  if (ua.includes("Windows")) return "Windows";
+  if (ua.includes("Mac")) return "MacOS";
+  if (ua.includes("Android")) return "Android";
+  if (ua.includes("iPhone")) return "iOS";
+  if (ua.includes("Linux")) return "Linux";
 
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+  return "Unknown";
+}
 
-        console.log("Visitor logged");
+async function sendVisitorData() {
 
-      } catch (err) {
-        console.error("Error:", err);
-      }
-    }
+  try {
 
-    collectVisitorInfo();
-  </script>
+    // Get IP + Location
+    const response = await fetch("https://ipapi.co/json/");
+    const location = await response.json();
+
+    const payload = {
+      deviceType: getDeviceType(),
+      browser: getBrowser(),
+      os: getOS(),
+      screenSize: screen.width + "x" + screen.height,
+      ip: location.ip || "",
+      city: location.city || "",
+      region: location.region || "",
+      country: location.country_name || "",
+      userAgent: navigator.userAgent
+    };
+
+    // Send to Google Sheets
+    const result = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    console.log(await result.text());
+
+  } catch (error) {
+
+    console.error("Error:", error);
+
+  }
+
+}
+
+sendVisitorData();
+
+</script>
+
 </body>
 </html>
